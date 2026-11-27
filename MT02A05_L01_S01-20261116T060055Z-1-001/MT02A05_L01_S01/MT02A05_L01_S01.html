@@ -3667,6 +3667,30 @@ body.vo-speaking .t12-chip .wv2{animation:wv2 1.2s steps(1) infinite;}
       }
     },
     {
+      "id": "P13",
+      "phase": "practice",
+      "eis": "iconic",
+      "type": "STORY_SCENE",
+      "prompt_hi": "समुद्री घोड़ों और स्टारफिश की संख्या कम है, अधिक है या बराबर है?",
+      "audio": {
+        "ask": "vo_p13_ask",
+        "hint": "vo_p13_hint",
+        "praise": "vo_p13_correct"
+      },
+      "data": {
+        "image_id": "scn_sea_total",
+        "emoji": "🐴",
+        "title_hi": "समुद्री घोड़ों और स्टारफिश की संख्या कम है, अधिक है या बराबर है?",
+        "alt_hi": "समुद्र तट पर रस्सियों से लटके लकड़ी के बोर्ड पर पकड़े गए समुद्री जीवों का चित्रलेख है: केकड़े छह, समुद्री घोड़े चार, स्टारफिश चार और जेलीफ़िश दो। बोर्ड के पास मछली पकड़ने की छड़ी लिए चिड़िया खड़ी है। नीचे कम, अधिक और बराबर के विकल्प हैं।",
+        "signal_name": "data_read_first_try"
+      },
+      "signals": {
+        "on_complete": [
+          "data_read_first_try"
+        ]
+      }
+    },
+    {
       "id": "CEL",
       "phase": "mastery",
       "eis": "enactive",
@@ -3835,6 +3859,9 @@ body.vo-speaking .t12-chip .wv2{animation:wv2 1.2s steps(1) infinite;}
       "vo_p12_ask": "assets/Audio/vo_p12_ask.mp3",
       "vo_p12_hint": "assets/Audio/vo_p12_hint.mp3",
       "vo_p12_correct": "assets/Audio/vo_p12_correct.mp3",
+      "vo_p13_ask": "assets/Audio/vo_p13_ask.mp3",
+      "vo_p13_hint": "assets/Audio/vo_p13_hint.mp3",
+      "vo_p13_correct": "assets/Audio/vo_p13_correct.mp3",
       "vo_g4_prompt": "assets/Audio/vo_g4_prompt.mp3",
       "vo_g5_prompt": "assets/Audio/vo_g5_prompt.mp3",
       "vo_g6_prompt": "assets/Audio/vo_g6_prompt.mp3",
@@ -4009,6 +4036,9 @@ body.vo-speaking .t12-chip .wv2{animation:wv2 1.2s steps(1) infinite;}
       "vo_p12_ask": "केकड़े, समुद्री घोड़ों से कम हैं, अधिक हैं या बराबर हैं?",
       "vo_p12_hint": "छह केकड़े और चार समुद्री घोड़े हैं। तुलना करके सही विकल्प चुनिए।",
       "vo_p12_correct": "बहुत बढ़िया! केकड़े, समुद्री घोड़ों से अधिक हैं।",
+      "vo_p13_ask": "समुद्री घोड़ों और स्टारफिश की संख्या कम है, अधिक है या बराबर है?",
+      "vo_p13_hint": "चार समुद्री घोड़े और चार स्टारफिश हैं। दोनों की संख्या देखकर सही विकल्प चुनिए।",
+      "vo_p13_correct": "बहुत बढ़िया! दोनों की संख्या बराबर है।",
       "vo_g4_prompt": "अलमारी में 3 गेंदें हैं। गेंद की पंक्ति के लिए 3 बिंदु डालो।",
       "vo_g5_prompt": "अलमारी में 2 टेडी हैं। टेडी की पंक्ति के लिए 2 बिंदु डालो।",
       "vo_g6_prompt": "चित्रालेख में कारें कितनी हैं? कार की पंक्ति के हर बिंदु पर टैप करके गिनो।",
@@ -11676,7 +11706,7 @@ const FIG_P8 = { id: "P8", image_id: "scn_fish_total", cls: "fig-p8", hintKind: 
    [fig-sea]) ----------
    Page 21's board with page 27's creatures (6 crabs, 4 seahorses, 4 starfish, 2 jellyfish), run by the same code (figTotalRun) with these
    configs; the board drawn from the frames' own layers (figSeaHTML). Page 28 comes in under page 27's sea wave (it starts once the water
-   has gone); 29 and 30 follow it straight on; after page 30 the celebration.
+   has gone); 29 and 30 follow it straight on; after page 30 page 31 ([fig-p13], the same board), then the celebration.
      0. the lesson's music plays on (at its own level) and the supplied questions.mp3 (the lake waves, sfx_p3_bed) plays low under it all
         page long, lower still under the voice — one player, running on from page 28 through page 30 (opened on its own, a page starts
         them as page 21 does); the board with its names and creatures, the bird and the speaker chip are all there at once;
@@ -11742,8 +11772,28 @@ const FIG_P12 = { id: "P12", image_id: "scn_sea_total", cls: "fig-sea fig-p12", 
   // the hint line's words (s into vo_p12_hint): the crab row (0) on छह, the seahorse row (1) on चार
   vo: { hint: { steps: [{ at: 0.06, row: 0 }, { at: 1.19, row: 1 }] } },
   beat: { say: 0.6, ask: 0.45, unhint: 0.5 } };
-const FIG_TOTALS = [FIG_P3, FIG_P4, FIG_P5, FIG_P6, FIG_P7, FIG_P8, FIG_P10, FIG_P11, FIG_P12];
-function figTotalCfg(slide){   // pages 21–26, [fig-sea] 28–30: the page's config (null: not one of them)
+/* ---------- [fig-p13] PAGE 31 (P13) = the Figma frame 1223:834 — pixel for pixel page 30's frame (1223:790): page 30's board, the same three word
+   cards (कम / अधिक / बराबर; the right one: बराबर), run by the same code with this config; it follows page 30 straight on (the lake waves run
+   on), and the celebration follows it:
+     1. "समुद्री घोड़ों और स्टारफिश की संख्या कम है, अधिक है या बराबर है?" (vo_p13_ask) with the chip's waves; the three cards pop in one
+        by one with the option pop;
+     2. the right card before a 3rd wrong one: page 1's correct bubble, the confetti with its sound, then "बहुत बढ़िया! दोनों की संख्या
+        बराबर है।" (vo_p13_correct); then the next page;
+     3. a 1st or 2nd wrong card: the wrong sound and the wiggle only (every card active, the board unchanged);
+     4. a 3rd wrong card (and any after it): the wiggle and the wrong sound, then "चार समुद्री घोड़े और चार स्टारफिश हैं। दोनों की
+        संख्या देखकर सही विकल्प चुनिए।" (vo_p13_hint): on the first "चार" the whole seahorse row lights and its seahorses get 1–4; on the
+        second "चार" the whole starfish row lights and its starfish get 1–4 — both rows lit together from then on; every picture stays
+        where it is (nothing paired); a beat after the line the lights and numbers go and the cards take taps again (page 30's);
+     5. the right card after the hint: the bubble and the confetti with its sound (no line); then the next page. */
+const FIG_P13 = { id: "P13", image_id: "scn_sea_total", cls: "fig-sea fig-p13", sea: true, hintKind: "steps",
+  rows: FIG_SEA.rows, off: [1, -1],   // page 30's board, 1 px right and 1 px up of page 28's
+  cards: FIG_P11.cards,
+  opts: FIG_P12.opts, right: "barabar",
+  // the hint line's words (s into vo_p13_hint, from its recipe): the seahorse row (1) on the first चार, the starfish row (2) on the second
+  vo: { hint: { steps: [{ at: 0.06, row: 1 }, { at: 1.60, row: 2 }] } },
+  beat: { say: 0.6, ask: 0.45, unhint: 0.5 } };
+const FIG_TOTALS = [FIG_P3, FIG_P4, FIG_P5, FIG_P6, FIG_P7, FIG_P8, FIG_P10, FIG_P11, FIG_P12, FIG_P13];
+function figTotalCfg(slide){   // pages 21–26, [fig-sea] 28–31: the page's config (null: not one of them)
   if(!(slide && slide.type === "STORY_SCENE" && slide.data)) return null;
   return FIG_TOTALS.find(P => slide.id === P.id && slide.data.image_id === P.image_id) || null;
 }
@@ -11752,7 +11802,7 @@ const FIG_P3_IMGS = ["fig_p3_bg", "fig_p3_card", "fig_p2_fish_r", "fig_p2_fish_g
 const FIG_P3_VO = ["vo_p3_intro", "vo_p3_ask", "vo_p3_hint", "vo_p3_great", "vo_correct_read", "vo_p4_ask", "vo_p4_hint", "vo_p5_ask", "vo_p5_hint", "vo_p6_ask", "vo_p6_hint", "vo_p7_ask", "vo_p7_hint", "vo_p8_ask", "vo_p8_hint"].map(n => "assets/Audio/" + n + ".mp3");
 const FIG_P3_BED = "assets/sfx/sfx_p3_bed.ogg";
 const FIG_P3_BED_VOL = 0.5, FIG_P3_BED_DUCK = 0.3;   // the lake waves: low under the music (≈ −43 LUFS), lower under the voice
-function figTotal(slide){   // pages 21–26; [fig-sea] 28–30
+function figTotal(slide){   // pages 21–26; [fig-sea] 28–31
   return !!figTotalCfg(slide);
 }
 /* warm page 21's (and 22–26's) pictures and lines while the pages before it play */
@@ -11760,10 +11810,10 @@ window.addEventListener("load", ()=> setTimeout(()=>{
   FIG_P3_IMGS.forEach(u =>{ try{ const i = new Image(); i.decoding = "async"; i.src = u; }catch(e){} });
   FIG_P3_VO.forEach(u =>{ try{ const a = new Audio(); a.preload = "auto"; a.src = u; }catch(e){} });
 }, 3400));
-/* [fig-sea] warm pages 28–30's pictures and lines while the pages before them play */
+/* [fig-sea] warm pages 28–31's pictures and lines while the pages before them play */
 const FIG_SEA_IMGS = ["fig_p10_bg", "fig_p10_card", "fig_p10_crab", "fig_p10_horse", "fig_p10_star", "fig_p10_jelly"].map(n => "assets/Images/" + n + ".webp");
 const FIG_SEA_VO = ["vo_p10_ask", "vo_p10_hint", "vo_p10_correct", "vo_p11_ask", "vo_p11_hint", "vo_p11_correct", "vo_p12_ask", "vo_p12_hint",
-  "vo_p12_correct"].map(n => "assets/Audio/" + n + ".mp3");
+  "vo_p12_correct", "vo_p13_ask", "vo_p13_hint", "vo_p13_correct"].map(n => "assets/Audio/" + n + ".mp3");
 window.addEventListener("load", ()=> setTimeout(()=>{
   FIG_SEA_IMGS.forEach(u =>{ try{ const i = new Image(); i.decoding = "async"; i.src = u; }catch(e){} });
   FIG_SEA_VO.forEach(u =>{ try{ const a = new Audio(); a.preload = "auto"; a.src = u; }catch(e){} });
