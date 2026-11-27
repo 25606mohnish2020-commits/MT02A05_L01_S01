@@ -11820,7 +11820,7 @@ const FIG_P13 = { id: "P13", image_id: "scn_sea_total", cls: "fig-sea fig-p13", 
   cards: FIG_P11.cards,
   opts: FIG_P12.opts, right: "barabar",
   // the hint line's words (s into vo_p13_hint, from its recipe): the seahorse row (1) on the first चार, the starfish row (2) on the second
-  vo: { hint: { steps: [{ at: 0.06, row: 1 }, { at: 1.60, row: 2 }] } },
+  vo: { hint: { steps: [{ at: 0.06, row: 1 }, { at: 1.677, row: 2 }] } },
   beat: { say: 0.6, ask: 0.45, unhint: 0.5 } };
 /* ---------- [fig-p14] PAGE 32 (P14) = the Figma frame 1223:878 — pixel for pixel page 28's frame (1223:635): page 28's board and its four
    picture cards (the right one: जेलीफ़िश), run by the same code with this config; it follows page 31 straight on (the lake waves run on),
@@ -11840,8 +11840,9 @@ const FIG_P14 = { id: "P14", image_id: "scn_sea_total", cls: "fig-sea fig-p14", 
   opts: FIG_P10.opts, right: "jelly",   // page 28's four picture cards
   row: 3,   // the jellyfish row (the fewest: 2)
   emph: { labels: true },   // on सबसे: the row lights and glows, its 1, 2 labels pulse
-  // the hint line's words (s into vo_p14_hint, from its recipe): rows[i] = row i's numbers (even steps over संख्याओं को देखिए); pulse = सबसे
-  vo: { hint: { rows: [0.06, 0.40, 0.75, 1.10], pulse: 1.70 } },
+  // the hint line's words (s into vo_p14_hint, from its recipe): rows[i] = row i's numbers, at even steps from संख्याओं (0.06) into देखिए
+  // (0.864); pulse = सबसे (1.884)
+  vo: { hint: { rows: [0.06, 0.40, 0.75, 1.09], pulse: 1.884 } },
   hold: 5.0,   // s the emphasised hint stays (from सबसे) before it goes
   beat: { say: 0.6, ask: 0.45, unhint: 0.5 } };
 const FIG_TOTALS = [FIG_P3, FIG_P4, FIG_P5, FIG_P6, FIG_P7, FIG_P8, FIG_P10, FIG_P11, FIG_P12, FIG_P13, FIG_P14];
