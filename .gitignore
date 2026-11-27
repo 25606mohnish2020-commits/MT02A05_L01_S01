@@ -1,0 +1,11 @@
+# Work files that the website does not need (kept on this PC / OneDrive only)
+_*/
+_*.json
+*.zip
+*.pptx
+*.xlsx
+
+# Office / Windows clutter
+~$*
+desktop.ini
+Thumbs.db

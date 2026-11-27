@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>जानकारी खोजी — G2.52</title>
+<style>
+:root{--bg:#FFF8EC;--ink:#2B2B3A;--muted:#6E6A80;--card:#fff;--line:#E7DCC8;--accent:#FF8A3D;--accentD:#D9692A;--blue:#3B82F6;--good:#2E9E5B;--glow:#FFD54A;--dot:#3F4BB0;--rowbg:#FBF6EC}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Nirmala UI","Noto Sans Devanagari","Mangal","Kohinoor Devanagari",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+button{font-family:inherit}
+#app{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;max-width:1100px;margin:0 auto;padding:10px 16px 14px;gap:10px}
+header{display:flex;align-items:center;gap:10px}
+.phases{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+.chip{padding:6px 12px;border-radius:999px;background:#F1E6D2;color:var(--muted);font-size:15px;font-weight:700;transition:.3s}
+.chip.on{background:var(--accent);color:#fff}
+.chip.done{background:#D9EFD9;color:#2E7D32}
+.iconbtn{width:54px;height:54px;flex:none;border-radius:50%;border:none;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14);display:grid;place-items:center;cursor:pointer}
+.iconbtn svg{width:28px;height:28px}
+.iconbtn.off{opacity:.45}
+#stage{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0;animation:fadein .5s}
+.duo{display:flex;gap:14px;align-items:stretch}
+.duo>*{flex:1;min-width:0}
+@media (max-width:760px){.duo{flex-direction:column}}
+#bar{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.08);min-height:74px}
+#ptext{font-size:clamp(19px,2.5vw,25px);font-weight:700;line-height:1.4}
+#ptext.in{animation:fadein .35s}
+#actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;min-height:84px;align-items:center}
+.optwrap{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{min-height:64px;min-width:64px;padding:10px 28px;font-size:24px;font-weight:800;border-radius:18px;border:none;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 4px 0 var(--accentD);animation:fadein .4s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accentD)}
+.btn:disabled{background:#D6CFC2;box-shadow:0 4px 0 #B9B1A2;cursor:default}
+.btn.soft{background:#fff;color:var(--ink);border:2px solid #E2D6C0;box-shadow:0 4px 0 #E2D6C0}
+.btn.small{min-height:48px;font-size:18px;padding:8px 18px}
+.opt{min-width:88px;min-height:88px;font-size:36px;background:#fff;color:var(--ink);border:3px solid #E2D6C0;box-shadow:0 4px 0 #E2D6C0;border-radius:20px;display:flex;align-items:center;gap:8px;justify-content:center;padding:8px 18px;cursor:pointer;font-weight:800;animation:fadein .4s;transition:background .2s,border-color .2s}
+.opt svg{width:48px;height:42px;flex:none}
+.opt .lbl{font-size:23px}
+.opt:disabled{cursor:default}
+.opt.sel{border-color:var(--blue);background:#EAF2FF;box-shadow:0 4px 0 var(--blue)}
+.opt.right{border-color:var(--good);background:#E3F5EA;box-shadow:0 4px 0 var(--good)}
+.nudge{animation:nudge .45s}
+@keyframes nudge{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+.popin{animation:pop .4s}
+.card{background:var(--card);border-radius:20px;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:8px;position:relative}
+.card h3{margin:0;font-size:19px;text-align:center;color:var(--muted)}
+/* aquarium */
+.aquarium{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/10;border:6px solid #5B8DB8;background:#9FDCF7}
+.aquarium .deco{position:absolute;inset:0;width:100%;height:100%}
+.fish{position:absolute;width:19%;aspect-ratio:100/64;border:none;background:none;padding:0;cursor:pointer;border-radius:40%}
+.fish svg{width:100%;height:100%;display:block;transition:filter .3s}
+.fish.flip svg{transform:scaleX(-1)}
+.glow svg,svg.glow{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #FFC400)}
+.fish.glow,.toy.glow{animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.wiggle{animation:nudge .45s}
+.marker{position:absolute;top:-12px;right:-4px;width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--good);font-weight:800;font-size:19px;display:grid;place-items:center;animation:pop .35s;color:var(--ink);z-index:3}
+.bubble{position:absolute;left:96%;bottom:10%;width:9px;height:9px;border-radius:50%;border:2px solid rgba(255,255,255,.85);animation:rise 6s linear infinite;pointer-events:none}
+@keyframes rise{0%{transform:translateY(0);opacity:0}10%{opacity:1}100%{transform:translateY(-240px);opacity:0}}
+/* table */
+.trow{display:grid;grid-template-columns:1fr 100px;align-items:center;gap:8px;background:var(--rowbg);border-radius:14px;padding:6px 10px;border:3px solid transparent;transition:background .3s,border-color .3s}
+.trow.head{background:none;font-size:16px;color:var(--muted);font-weight:700;padding:0 10px;border:none}
+.trow.head div:last-child{text-align:center}
+.lab{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;padding:4px 6px;border-radius:12px;transition:.3s}
+.lab svg{width:54px;height:40px;flex:none}
+.num{justify-self:center;font-size:32px;font-weight:800;width:70px;height:58px;display:grid;place-items:center;border-radius:12px;background:#fff;border:3px solid var(--line);transition:.3s}
+.num.empty{color:#C9BBA0;border-style:dashed}
+.num.big{transform:scale(1.2)}
+.trow.focus{background:#FFF0C2}
+.trow.pickable{cursor:pointer;border-color:#E2D6C0}
+.trow.sel{border-color:var(--blue);background:#EAF2FF}
+.hl{box-shadow:0 0 0 4px var(--glow),0 0 16px 4px rgba(255,200,0,.55)!important;background:#FFF6CC!important}
+.tappable{cursor:pointer;animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{50%{box-shadow:0 0 0 5px rgba(59,130,246,.45)}}
+/* pictograph */
+.picto{--s:clamp(26px,6.2vw,36px)}
+.pbody{display:flex;flex-direction:column;gap:8px}
+.prow{display:grid;grid-template-columns:86px 4px 1fr;align-items:center;gap:10px;background:var(--rowbg);border-radius:14px;padding:6px 10px;transition:background .3s}
+.prow.focus{background:#FFF0C2}
+.ppic{display:flex;flex-direction:column;align-items:center;font-size:16px;font-weight:700;color:var(--ink);border-radius:12px;padding:2px;transition:.3s}
+.ppic svg{width:52px;height:40px}
+.pdiv{align-self:stretch;background:#CDBD9F;border-radius:2px}
+.slots{display:grid;grid-template-columns:repeat(var(--n),var(--s));gap:calc(var(--s)*.32);justify-content:start}
+.slot{width:var(--s);height:var(--s);display:grid;place-items:center;position:relative}
+.dot{width:78%;height:78%;border-radius:50%;background:var(--dot);display:block;position:relative;z-index:2;transition:background .3s,box-shadow .3s}
+.slot .dot{animation:pop .35s}
+.dot.fly{width:28px;height:28px}
+.dot.sm{width:20px;height:20px;display:inline-block;vertical-align:middle}
+.dot.paired{background:var(--good)}
+.dot.extra{background:#F57C00;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(245,124,0,.35)}}
+.dot.end{box-shadow:0 0 0 4px var(--glow)}
+.dot.tappable{animation:breathe 1.6s ease-in-out infinite}
+.dmark{position:absolute;top:-58%;left:50%;transform:translateX(-50%);background:#fff;border:2px solid var(--good);border-radius:10px;font-size:15px;font-weight:800;padding:0 6px;z-index:3;animation:pop .3s}
+.pkey{align-self:flex-end;font-size:18px;font-weight:700;color:var(--ink);background:#F4EEFF;border-radius:12px;padding:6px 12px;transition:.3s}
+.pairline{position:absolute;width:6px;border-radius:3px;background:var(--good);z-index:1;animation:fadein .3s}
+@media (max-width:520px){.prow{grid-template-columns:66px 4px 1fr;gap:6px;padding:6px}.ppic svg{width:42px;height:34px}.ppic{font-size:14px}}
+/* shelf */
+.shelf{background:#C98B55;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:10px;border:6px solid #8D5A2B}
+.plank{background:#F6E6CE;border-radius:8px;display:flex;justify-content:space-around;align-items:flex-end;padding:12px 4px 2px;border-bottom:10px solid #8D5A2B}
+.toy{width:17%;border:none;background:none;padding:0;cursor:pointer;position:relative;border-radius:12px}
+.toy svg{width:100%;display:block;transition:opacity .3s}
+.toy.used svg{opacity:.55}
+.toy .tdot{position:absolute;top:-6px;right:-2px;width:16px;height:16px;border-radius:50%;background:var(--dot);border:2px solid #fff;animation:pop .3s}
+/* equations, banners */
+.eq{display:flex;gap:8px;font-size:clamp(26px,4vw,34px);font-weight:800;justify-content:center;align-items:center;flex-wrap:wrap;animation:fadein .4s;padding:4px}
+.eqbox{min-width:58px;height:60px;padding:0 8px;border-radius:12px;background:#fff;border:3px dashed #D8CBB2;display:grid;place-items:center;color:#C9BBA0}
+.eqbox.filled{border-style:solid;border-color:var(--blue);color:var(--ink)}
+.qbanner{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.06);font-size:clamp(20px,2.6vw,26px);font-weight:800;animation:fadein .4s}
+.qcount{font-size:15px;color:#fff;background:var(--blue);padding:4px 10px;border-radius:999px;flex:none}
+.dispwrap{display:flex;justify-content:center}
+.dispwrap>.card{width:100%;max-width:600px}
+.missions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mb{width:36px;height:36px;border-radius:50%;background:#EEE6D6;display:grid;place-items:center;font-weight:800;color:var(--muted);transition:.3s}
+.mb.done{background:var(--blue);color:#fff}
+.mb.cur{outline:3px solid var(--accent);outline-offset:2px}
+@media (max-width:420px){.missions{gap:6px}.mb{width:30px;height:30px;font-size:14px}}
+.inter{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;animation:fadein .6s}
+.inter h1{margin:0;font-size:clamp(30px,5vw,46px)}
+.inter h2{margin:0;font-size:clamp(24px,3.6vw,34px)}
+.inter p{margin:0;font-size:20px;color:var(--muted)}
+.inter-art svg{width:min(320px,70vw);height:auto}
+.adult{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:15px;color:var(--muted);align-items:center}
+#hand{position:fixed;left:50%;top:60%;width:48px;height:56px;pointer-events:none;z-index:60;transition:left .6s ease,top .6s ease,opacity .3s;opacity:0;filter:drop-shadow(0 3px 3px rgba(0,0,0,.3))}
+.flynum{position:fixed;z-index:55;width:58px;height:58px;border-radius:14px;background:#fff;border:3px solid var(--blue);font-size:32px;font-weight:800;display:grid;place-items:center;pointer-events:none}
+.flyer{position:fixed;z-index:55;pointer-events:none}
+.star{position:absolute;font-size:28px;animation:fall 2.6s linear forwards}
+@keyframes fall{from{transform:translateY(-40px) rotate(0)}to{transform:translateY(80vh) rotate(360deg);opacity:0}}
+#report{position:fixed;inset:0;background:rgba(30,25,40,.45);display:none;align-items:flex-start;justify-content:center;z-index:80;padding:20px 12px;overflow:auto}
+#report.show{display:flex}
+#report .sheet{background:#fff;border-radius:18px;max-width:760px;width:100%;padding:18px;font-size:16px}
+#report table{border-collapse:collapse;width:100%;margin:8px 0 16px}
+#report th,#report td{border:1px solid #E7DCC8;padding:6px 8px;text-align:left;vertical-align:top}
+#report th{background:#FBF6EC}
+#report h2{margin:0 0 6px}
+#report h3{margin:14px 0 4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="phases">
+      <span class="chip">1 · सीखें</span>
+      <span class="chip">2 · साथ में अभ्यास</span>
+      <span class="chip">3 · जानकारी खोजी</span>
+    </div>
+    <button class="iconbtn" id="sound" aria-label="आवाज़ चालू/बंद"></button>
+  </header>
+  <main id="stage"></main>
+  <div id="bar">
+    <button class="iconbtn" id="replay" aria-label="फिर से सुनो"></button>
+    <div id="ptext"></div>
+  </div>
+  <div id="actions"></div>
+</div>
+<div id="hand"><svg viewBox="0 0 48 56"><path d="M14 4c3 0 5 2 5 5v16h2v-4c0-3 5-3 5 0v4h1v-2c0-3 5-3 5 0v3h1c0-3 5-3 5 0v12c0 9-6 16-15 16h-3c-6 0-9-3-12-8l-7-11c-2-3 2-6 5-4l4 4V9c0-3 2-5 5-5z" fill="#fff" stroke="#333" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+<div id="report"><div class="sheet" id="reportSheet"></div></div>
+
+<script>
+/* ============ basics ============ */
+const $=(s,el=document)=>el.querySelector(s);
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function h(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const[k,v]of Object.entries(attrs)){if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v);}for(const k of kids.flat()){if(k==null)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+const NUMW=['शून्य','एक','दो','तीन','चार','पाँच','छह','सात','आठ','नौ','दस','ग्यारह','बारह'];
+const stage=$('#stage'),actions=$('#actions'),hand=$('#hand');
+const SPK='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="#FF8A3D"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="#FF8A3D" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+const SPK_OFF='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="#999"/><path d="M16 9l6 6M22 9l-6 6" stroke="#999" stroke-width="2" stroke-linecap="round"/></svg>';
+const REPLAY='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="#3B82F6"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="#3B82F6" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+$('#replay').innerHTML=REPLAY;
+
+/* ============ audio ============ */
+const SND={on:true,voice:null};
+function pickVoice(){const vs=speechSynthesis.getVoices();SND.voice=vs.find(v=>/^hi[-_]IN/i.test(v.lang))||vs.find(v=>/^hi/i.test(v.lang))||null;}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+const speakify=t=>t.replace(/\s*−\s*/g,' घटा ').replace(/\s*\+\s*/g,' और ').replace(/\s*=\s*\?/g,' कितने? ').replace(/\s*=\s*/g,' बराबर ');
+function speak(text){
+  return new Promise(res=>{
+    const quiet=Math.max(900,text.length*55);
+    if(!SND.on||!('speechSynthesis' in window)){setTimeout(res,quiet);return;}
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(speakify(text));u.lang='hi-IN';if(SND.voice)u.voice=SND.voice;u.rate=.9;
+    let done=false;const fin=()=>{if(!done){done=true;res();}};
+    u.onend=fin;u.onerror=fin;setTimeout(fin,Math.max(1500,text.length*95)+2500);
+    speechSynthesis.speak(u);
+  });
+}
+let replayText='',currentQ=null;
+async function say(text){
+  const p=$('#ptext');p.classList.remove('in');void p.offsetWidth;p.textContent=text;p.classList.add('in');
+  replayText=text;await speak(text);await wait(220);
+}
+$('#replay').onclick=()=>speak(currentQ||replayText);
+function paintSound(){const b=$('#sound');b.innerHTML=SND.on?SPK:SPK_OFF;b.classList.toggle('off',!SND.on);}
+$('#sound').onclick=()=>{SND.on=!SND.on;if(!SND.on&&'speechSynthesis' in window)speechSynthesis.cancel();paintSound();};
+paintSound();
+
+/* ============ ui helpers ============ */
+function setPhase(i){document.querySelectorAll('.chip').forEach((c,j)=>{c.classList.toggle('on',j===i);c.classList.toggle('done',j<i);});}
+function clearStage(){stage.innerHTML='';hideHand();stage.style.animation='none';void stage.offsetWidth;stage.style.animation='';}
+function clearActions(){actions.innerHTML='';}
+function nextBtn(label='आगे'){return new Promise(res=>{clearActions();const b=h('button',{class:'btn'},label+'  ▶');b.onclick=()=>{clearActions();res();};actions.append(b);});}
+function tapOnce(els){return new Promise(res=>{els.forEach(e=>{e.classList.add('tappable');e.onclick=ev=>{ev.stopPropagation();els.forEach(x=>{x.classList.remove('tappable');x.onclick=null;});res(e);};});});}
+function pick(vals){return new Promise(res=>{clearActions();const w=h('div',{class:'optwrap'});vals.forEach(v=>{const b=h('button',{class:'opt'},String(v));b.onclick=()=>{w.querySelectorAll('button').forEach(x=>x.disabled=true);b.classList.add('sel');res({v,b});};w.append(b);});actions.append(w);});}
+const glow=(els,on=true)=>[].concat(els).forEach(e=>e&&e.classList.toggle('glow',on));
+function unhl(root=document){root.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));}
+function inView(el){const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}
+async function pointTo(el){if(!inView(el)){el.scrollIntoView({block:'center',behavior:'smooth'});await wait(350);}const r=el.getBoundingClientRect();hand.style.opacity=1;hand.style.left=(r.left+r.width/2-14)+'px';hand.style.top=(r.top+r.height/2-4)+'px';await wait(650);}
+function hideHand(){hand.style.opacity=0;}
+function fly(node,fromEl,toEl,ms=800){
+  return new Promise(res=>{
+    const a=fromEl.getBoundingClientRect(),b=toEl.getBoundingClientRect();
+    node.classList.add(node.classList.contains('flynum')?'flynum':'flyer');document.body.append(node);
+    const w=node.offsetWidth,hh=node.offsetHeight;
+    node.style.left=(a.left+a.width/2-w/2)+'px';node.style.top=(a.top+a.height/2-hh/2)+'px';
+    node.getBoundingClientRect();
+    node.style.transition=`transform ${ms}ms cubic-bezier(.5,0,.3,1)`;
+    node.style.transform=`translate(${b.left+b.width/2-(a.left+a.width/2)}px,${b.top+b.height/2-(a.top+a.height/2)}px)`;
+    setTimeout(()=>{node.remove();res();},ms+60);
+  });
+}
+const numChip=n=>h('div',{class:'flynum'},String(n));
+function makeEq(parts){const el=h('div',{class:'eq'});const boxes=[];parts.forEach(p=>{if(['+','−','='].includes(p))el.append(h('span',{class:'op'},p));else{const b=h('span',{class:'eqbox'},p||' ');boxes.push(b);el.append(b);}});return{el,boxes,set(i,v){boxes[i].textContent=v;boxes[i].classList.add('filled','popin');}};}
+
+/* ============ illustrations ============ */
+const fishSVG=(c,d)=>`<svg viewBox="0 0 100 64"><path d="M72 32 L97 12 Q91 32 97 52 Z" fill="${d}"/><path d="M34 14 Q48 0 62 15 Z" fill="${d}"/><ellipse cx="44" cy="33" rx="33" ry="21" fill="${c}"/><path d="M52 25 q6 8 0 16" stroke="${d}" stroke-width="3" fill="none"/><circle cx="24" cy="28" r="6.5" fill="#fff"/><circle cx="22.5" cy="28" r="3.3" fill="#222"/><path d="M13 40 q4 3 8 0" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const carSVG=()=>`<svg viewBox="0 0 100 70"><path d="M24 32 L34 14 H64 L76 32Z" fill="#E53935"/><path d="M36 30 L42 18 H50 V30Z M54 30 V18 H62 L70 30Z" fill="#BFE6FF"/><rect x="6" y="30" width="88" height="22" rx="9" fill="#E53935"/><rect x="84" y="36" width="8" height="6" rx="2" fill="#FFE082"/><circle cx="28" cy="56" r="10" fill="#333"/><circle cx="28" cy="56" r="4" fill="#bbb"/><circle cx="72" cy="56" r="10" fill="#333"/><circle cx="72" cy="56" r="4" fill="#bbb"/></svg>`;
+const ballSVG=()=>`<svg viewBox="0 0 100 70"><circle cx="50" cy="37" r="30" fill="#1E88E5"/><path d="M21 34 Q50 18 79 34" stroke="#fff" stroke-width="5" fill="none"/><path d="M24 50 Q50 34 76 50" stroke="#FFEB3B" stroke-width="5" fill="none"/><circle cx="40" cy="20" r="5" fill="#fff" opacity=".5"/></svg>`;
+const teddySVG=()=>`<svg viewBox="0 0 100 70"><circle cx="37" cy="10" r="7" fill="#A1673A"/><circle cx="63" cy="10" r="7" fill="#A1673A"/><ellipse cx="50" cy="52" rx="20" ry="16" fill="#A1673A"/><circle cx="50" cy="22" r="16" fill="#B87A48"/><ellipse cx="50" cy="27" rx="7" ry="5" fill="#E8C49A"/><circle cx="44" cy="19" r="2.5" fill="#222"/><circle cx="56" cy="19" r="2.5" fill="#222"/><circle cx="50" cy="25" r="2" fill="#222"/><ellipse cx="50" cy="53" rx="10" ry="8" fill="#E8C49A"/><circle cx="33" cy="63" r="6" fill="#A1673A"/><circle cx="67" cy="63" r="6" fill="#A1673A"/></svg>`;
+const appleSVG=`<svg viewBox="0 0 60 60"><path d="M30 18c-6-6-22-4-22 14 0 14 10 24 16 24 3 0 4-2 6-2s3 2 6 2c6 0 16-10 16-24 0-18-16-20-22-14z" fill="#E53935"/><path d="M30 18c0-6 2-10 6-12" stroke="#6D4C41" stroke-width="3" fill="none"/><path d="M33 12c4-6 12-6 14-4-3 5-9 7-14 4z" fill="#43A047"/></svg>`;
+const bananaSVG=`<svg viewBox="0 0 60 60"><path d="M12 12c3 24 18 38 42 35 2 0 3-3 0-4-18-2-29-14-33-32-1-3-9-3-9 1z" fill="#FDD835" stroke="#C9A400" stroke-width="2"/><rect x="9" y="7" width="8" height="7" rx="2" fill="#6D4C41"/></svg>`;
+const mangoSVG=`<svg viewBox="0 0 60 60"><path d="M30 12c14 0 22 14 20 27-2 12-12 18-22 16S8 44 10 31 18 12 30 12z" fill="#FFA726"/><path d="M28 12c8-7 16-5 18-3-6 5-12 6-18 3z" fill="#43A047"/><ellipse cx="38" cy="28" rx="5" ry="8" fill="#FFCC80" opacity=".7"/></svg>`;
+const balloonSVG=c=>`<svg viewBox="0 0 60 70"><ellipse cx="30" cy="26" rx="18" ry="22" fill="${c}"/><path d="M27 47 L33 47 L30 52Z" fill="${c}"/><path d="M30 52 q-5 8 0 16" stroke="#777" fill="none" stroke-width="2"/><ellipse cx="23" cy="18" rx="4" ry="7" fill="#fff" opacity=".45"/></svg>`;
+const bookSVG=`<svg viewBox="0 0 60 60"><rect x="12" y="8" width="36" height="44" rx="3" fill="#1E88E5"/><rect x="12" y="8" width="7" height="44" fill="#1565C0"/><rect x="24" y="17" width="18" height="6" rx="2" fill="#fff"/></svg>`;
+const pencilSVG=`<svg viewBox="0 0 60 60"><g transform="rotate(-40 30 30)"><rect x="8" y="24" width="34" height="12" fill="#FBC02D"/><rect x="3" y="24" width="7" height="12" fill="#F48FB1"/><path d="M42 24 L54 30 L42 36Z" fill="#FFE0B2"/><path d="M50 28 L54 30 L50 32Z" fill="#333"/></g></svg>`;
+const eraserSVG=`<svg viewBox="0 0 60 60"><g transform="rotate(-15 30 30)"><rect x="10" y="20" width="40" height="20" rx="4" fill="#EC407A"/><rect x="10" y="20" width="16" height="20" rx="4" fill="#90CAF9"/></g></svg>`;
+const kiteSVG=c=>`<svg viewBox="0 0 60 70"><path d="M30 4 L52 28 L30 52 L8 28Z" fill="${c}" stroke="#555" stroke-width="1.5"/><path d="M30 4V52M8 28H52" stroke="#fff" stroke-width="1.5" opacity=".7"/><path d="M30 52 q6 6 0 10 q-6 4 0 8" stroke="#777" fill="none" stroke-width="2"/></svg>`;
+const SEARCH_ART=`<svg viewBox="0 0 300 200"><rect x="30" y="30" width="150" height="130" rx="14" fill="#fff" stroke="#E2D6C0" stroke-width="4"/><rect x="48" y="52" width="114" height="22" rx="6" fill="#FBF6EC"/><rect x="48" y="84" width="114" height="22" rx="6" fill="#FFF0C2"/><rect x="48" y="116" width="114" height="22" rx="6" fill="#FBF6EC"/><circle cx="200" cy="110" r="46" fill="#EAF2FF" stroke="#3B82F6" stroke-width="10"/><path d="M232 142 L272 182" stroke="#3B82F6" stroke-width="16" stroke-linecap="round"/><circle cx="186" cy="96" r="10" fill="#fff" opacity=".8"/></svg>`;
+
+/* ============ data ============ */
+const FISHC={y:{name:'पीली',c:'#FFC93C',d:'#E0A100'},p:{name:'गुलाबी',c:'#FF7EB6',d:'#D94F8C'},u:{name:'बैंगनी',c:'#9B6BEF',d:'#6E43C4'}};
+// [colour, left%, top%, flipped] — 3 yellow, 2 pink, 4 purple; fixed, non-overlapping
+const FISH_LAYOUT=[['y',6,8,0],['p',40,8,1],['u',74,8,0],['u',18,39,1],['y',50,39,0],['p',76,39,0],['u',6,69,0],['y',40,69,1],['u',74,69,1]];
+const TOYS={car:{sing:'कार',plur:'कारें',svg:carSVG()},ball:{sing:'गेंद',plur:'गेंदें',svg:ballSVG()},teddy:{sing:'टेडी',plur:'टेडी',svg:teddySVG()}};
+// 5 cars, 3 balls, 2 teddies
+const TOY_ORDER=[['car','ball','teddy','car','ball'],['car','teddy','car','ball','car']];
+
+const FRUIT={kind:'table',title:'फलों की तालिका',head:['फल','संख्या'],intro:'यह फलों की तालिका है।',cats:[
+  {key:'apple',label:'सेब',of:'सेब',icon:appleSVG,value:3},
+  {key:'banana',label:'केले',of:'केलों',icon:bananaSVG,value:2},
+  {key:'mango',label:'आम',of:'आम',icon:mangoSVG,value:5}]};
+const BALLOON={kind:'picto',title:'गुब्बारों का चित्रालेख',unit:'गुब्बारा',intro:'यह गुब्बारों का चित्रालेख है।',intro2:'एक बिंदु मतलब एक गुब्बारा।',cats:[
+  {key:'red',label:'लाल',of:'लाल गुब्बारों',icon:balloonSVG('#EF4444'),value:6},
+  {key:'blue',label:'नीले',of:'नीले गुब्बारों',icon:balloonSVG('#3B82F6'),value:2},
+  {key:'green',label:'हरे',of:'हरे गुब्बारों',icon:balloonSVG('#22A45D'),value:3}]};
+const SCHOOL={kind:'table',title:'कक्षा की चीज़ें',head:['चीज़','संख्या'],cats:[
+  {key:'book',label:'किताबें',of:'किताबों',icon:bookSVG,value:7},
+  {key:'pencil',label:'पेंसिलें',of:'पेंसिलों',icon:pencilSVG,value:4},
+  {key:'eraser',label:'रबर',of:'रबर',icon:eraserSVG,value:2}]};
+const KITES={kind:'picto',title:'पतंगों का चित्रालेख',unit:'पतंग',cats:[
+  {key:'red',label:'लाल',of:'लाल पतंगों',icon:kiteSVG('#EF4444'),value:2},
+  {key:'yellow',label:'पीली',of:'पीली पतंगों',icon:kiteSVG('#FACC15'),value:5},
+  {key:'green',label:'हरी',of:'हरी पतंगों',icon:kiteSVG('#22A45D'),value:4}]};
+
+const CAT_TYPES=['find','most','least','decide'];
+const GUIDED=[
+  {d:FRUIT,type:'value',key:'apple',q:'सेब कितने हैं?',opts:[2,3,5],ans:3,tip:'पहले सेब की पंक्ति ढूँढो। फिर उसी पंक्ति की संख्या पढ़ो।',ok:'सेब की पंक्ति में 3 लिखा है।'},
+  {d:FRUIT,type:'find',num:2,q:'किस फल की संख्या 2 है?',ans:'banana',tip:'संख्याओं में 2 ढूँढो। फिर उसी पंक्ति का फल देखो।',ok:'2 केलों की पंक्ति में है।'},
+  {d:FRUIT,type:'most',q:'कौन-सा फल सबसे ज़्यादा है?',ans:'mango',tip:'तीनों संख्याएँ देखो। सबसे बड़ी संख्या किस पंक्ति में है?',ok:'5 सबसे बड़ी संख्या है। आम सबसे ज़्यादा हैं।'},
+  {d:BALLOON,type:'value',key:'green',q:'हरे गुब्बारे कितने हैं?',opts:[2,3,6],ans:3,tip:'हरे गुब्बारे की पंक्ति ढूँढो। उसके बिंदु एक-एक करके गिनो।',ok:'हरे गुब्बारों की पंक्ति में 3 बिंदु हैं।'},
+  {d:BALLOON,type:'least',q:'किस रंग के गुब्बारे सबसे कम हैं?',ans:'blue',tip:'हर पंक्ति के बिंदु देखो। किस पंक्ति में सबसे कम बिंदु हैं?',ok:'नीले गुब्बारों की पंक्ति सबसे छोटी है।'},
+  {d:BALLOON,type:'more',a:'red',b:'blue',q:'लाल गुब्बारे, नीले गुब्बारों से कितने ज़्यादा हैं?',opts:[2,4,8],ans:4,tip:'लाल और नीले बिंदुओं की जोड़ी बनाओ। कितने लाल बिंदु अकेले बचे?',ok:'2 जोड़ियाँ बनीं, 4 लाल बिंदु अकेले बचे। 6 − 2 = 4।'},
+  {d:BALLOON,type:'fewer',a:'blue',b:'green',q:'नीले गुब्बारे, हरे गुब्बारों से कितने कम हैं?',opts:[1,2,5],ans:1,tip:'नीले और हरे बिंदुओं की जोड़ी बनाओ। कितने हरे बिंदु अकेले बचे?',ok:'1 हरा बिंदु अकेला बचा। 3 − 2 = 1।'},
+  {d:FRUIT,type:'total',q:'सब फल मिलाकर कितने हैं?',opts:[8,10,11],ans:10,tip:'हर पंक्ति की संख्या लो। तीनों को जोड़ो।',ok:'3 + 2 + 5 = 10। कुल 10 फल हैं।'}
+];
+const MISSIONS=[
+  {d:SCHOOL,type:'value',q:'पेंसिलें कितनी हैं?',opts:[2,4,7],ans:4},
+  {d:SCHOOL,type:'find',q:'किस चीज़ की संख्या 2 है?',ans:'eraser'},
+  {d:SCHOOL,type:'more',q:'किताबें, पेंसिलों से कितनी ज़्यादा हैं?',opts:[3,4,11],ans:3},
+  {d:SCHOOL,type:'decide',q:'जो चीज़ सबसे ज़्यादा है, वह बच्चों में बाँटनी है। कौन-सी चीज़ बाँटें? उसे चुनो, फिर तालिका में उसकी पंक्ति छुओ।',ans:'book',row:'book'},
+  {d:KITES,type:'value',q:'हरी पतंगें कितनी हैं?',opts:[2,4,5],ans:4},
+  {d:KITES,type:'least',q:'किस रंग की पतंगें सबसे कम हैं?',ans:'red'},
+  {d:KITES,type:'fewer',q:'लाल पतंगें, पीली पतंगों से कितनी कम हैं?',opts:[2,3,7],ans:3},
+  {d:KITES,type:'total',q:'सब पतंगें मिलाकर कितनी हैं?',opts:[9,11,12],ans:11}
+];
+
+/* ============ records (guided and independent kept separate) ============ */
+const REC={startedAt:new Date().toISOString(),guided:[],independent:[]};
+function save(){try{localStorage.setItem('G2_52_last_session',JSON.stringify(REC));}catch(e){}}
+window.G2_52_RECORD=REC;
+
+/* ============ components ============ */
+const AQ_DECO=`<svg class="deco" viewBox="0 0 160 100" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFF2FF"/><stop offset="1" stop-color="#6CC3EE"/></linearGradient></defs><rect width="160" height="100" fill="url(#wg)"/><path d="M0 92 Q40 87 80 91 T160 90 V100 H0Z" fill="#F2D49B"/><path d="M2 96 q-1 -10 2 -16 q2 8 0 16z M5 96 q1 -8 3 -12 q0 6 -1 12z" fill="#3FA66B"/><path d="M156 96 q1 -10 -2 -16 q-2 8 0 16z" fill="#3FA66B"/><circle cx="60" cy="95" r="2" fill="#E9BE7A"/><circle cx="110" cy="96" r="2.5" fill="#E9BE7A"/></svg><span class="bubble"></span><span class="bubble" style="animation-delay:2s;left:97%"></span><span class="bubble" style="animation-delay:4s;left:95.5%"></span>`;
+function makeAquarium(){
+  const box=h('div',{class:'aquarium',html:AQ_DECO});
+  const fish=FISH_LAYOUT.map(([k,x,y,f])=>{const b=h('button',{class:'fish'+(f?' flip':''),'aria-label':FISHC[k].name+' मछली',html:fishSVG(FISHC[k].c,FISHC[k].d)});b.style.left=x+'%';b.style.top=y+'%';b.dataset.k=k;box.append(b);return b;});
+  const el=h('div',{class:'card'},h('h3',null,'एक्वेरियम'),box);
+  return{el,fish,of:k=>fish.filter(f=>f.dataset.k===k),mark(f,n){f.append(h('span',{class:'marker'},String(n)));},clearMarks(){box.querySelectorAll('.marker').forEach(m=>m.remove());}};
+}
+function makeTable(title,head,rows){
+  const el=h('div',{class:'card'},h('h3',null,title),h('div',{class:'trow head'},h('div',null,head[0]),h('div',null,head[1])));
+  const R={};
+  rows.forEach(r=>{const lab=h('div',{class:'lab',html:r.icon+`<span>${r.label}</span>`});const num=h('div',{class:'num'+(r.value==null?' empty':'')},r.value==null?'?':String(r.value));const row=h('div',{class:'trow'},lab,num);el.append(row);R[r.key]={row,lab,num,value:r.value};});
+  return{el,rows:R,setVal(k,v){R[k].value=v;R[k].num.textContent=v;R[k].num.classList.remove('empty');R[k].num.classList.add('popin');}};
+}
+function makePicto(title,rows,n,unit){
+  const body=h('div',{class:'pbody'});const el=h('div',{class:'card picto'},h('h3',null,title),body);const R={};
+  function addDot(k){const r=R[k];const d=h('span',{class:'dot'});r.slots[r.dots.length].append(d);r.dots.push(d);return d;}
+  rows.forEach(r=>{const pic=h('div',{class:'ppic',html:r.icon+`<span>${r.label}</span>`});const slots=h('div',{class:'slots'});slots.style.setProperty('--n',n);const S=[];for(let i=0;i<n;i++){const s=h('div',{class:'slot'});S.push(s);slots.append(s);}const row=h('div',{class:'prow'},pic,h('div',{class:'pdiv'}),slots);body.append(row);R[r.key]={row,pic,slots:S,dots:[]};for(let i=0;i<(r.value||0);i++)addDot(r.key);});
+  const key=h('div',{class:'pkey',html:`<span class="dot sm"></span> = 1 ${unit}`});el.append(key);
+  return{el,rows:R,addDot,key};
+}
+function markDot(dot,n){dot.parentElement.append(h('span',{class:'dmark'},String(n)));}
+function pairLine(container,A,B){
+  const c=container.getBoundingClientRect(),a=A.getBoundingClientRect(),b=B.getBoundingClientRect();
+  const x=a.left+a.width/2-c.left,y1=a.top+a.height/2-c.top,y2=b.top+b.height/2-c.top;
+  const l=h('div',{class:'pairline'});l.style.left=(x-3)+'px';l.style.top=Math.min(y1,y2)+'px';l.style.height=Math.abs(y2-y1)+'px';
+  container.append(l);A.classList.add('paired');B.classList.add('paired');
+}
+function makeShelf(){
+  const sh=h('div',{class:'shelf'});const toys=[];
+  TOY_ORDER.forEach(rk=>{const pl=h('div',{class:'plank'});rk.forEach(k=>{const b=h('button',{class:'toy','aria-label':TOYS[k].sing,html:TOYS[k].svg});b.dataset.k=k;pl.append(b);toys.push(b);});sh.append(pl);});
+  return{el:h('div',{class:'card'},h('h3',null,'खिलौनों की अलमारी'),sh),toys,of:k=>toys.filter(t=>t.dataset.k===k)};
+}
+async function interstitial(art,title,line){
+  clearStage();clearActions();currentQ=null;
+  stage.append(h('div',{class:'inter'},h('div',{class:'inter-art',html:art}),h('h2',null,title),line?h('p',null,line):null));
+  await say(title);if(line)await say(line);await nextBtn();
+}
+
+/* ============ TEACHING 1: aquarium ============ */
+async function teachFish(){
+  setPhase(0);clearStage();clearActions();currentQ=null;
+  const aq=makeAquarium();
+  const tb=makeTable('मछलियों की तालिका',['मछली का रंग','संख्या'],['y','p','u'].map(k=>({key:k,icon:fishSVG(FISHC[k].c,FISHC[k].d),label:FISHC[k].name+' मछली',value:null})));
+  stage.append(h('div',{class:'duo'},aq.el,tb.el));
+  await say('इस एक्वेरियम में अलग-अलग रंगों की मछलियाँ हैं।');
+  await say('चलो, गिनकर उनकी संख्या दर्ज करें।');
+  // system models yellow
+  const R=tb.rows;R.y.row.classList.add('focus');
+  await say('देखो, पहले पीली मछलियाँ गिनते हैं।');
+  const ys=aq.of('y');
+  for(let i=0;i<ys.length;i++){await pointTo(ys[i]);aq.mark(ys[i],i+1);await speak(NUMW[i+1]);}
+  await say('पीली मछलियाँ 3 हैं।');
+  await pointTo(R.y.num);hideHand();
+  await fly(numChip(3),ys[2].querySelector('.marker')||ys[2],R.y.num);tb.setVal('y',3);
+  await say('पीली मछली के आगे 3 लिख दिया।');
+  aq.clearMarks();R.y.row.classList.remove('focus');
+  await nextBtn();
+  await childCountFish(aq,tb,'p');
+  await childCountFish(aq,tb,'u');
+  await say('तालिका पूरी हो गई। एक तरफ़ मछलियाँ, दूसरी तरफ़ उनकी गिनती।');
+  await nextBtn();
+  await readFish(aq,tb);
+}
+async function childCountFish(aq,tb,k){
+  const F=FISHC[k],row=tb.rows[k],targets=aq.of(k);let n=0;
+  row.row.classList.add('focus');
+  await say(`अब तुम ${F.name} मछलियाँ गिनो।`);
+  await say(`हर ${F.name} मछली पर एक बार टैप करो।`);
+  await new Promise(done=>{
+    clearActions();
+    const help=h('button',{class:'btn soft'},'मदद');
+    help.onclick=()=>{const left=targets.filter(f=>!f.dataset.c);glow(left);say(`${F.name} मछलियाँ चमक रही हैं। इन पर टैप करो।`);setTimeout(()=>glow(left,false),3000);};
+    actions.append(help);
+    aq.fish.forEach(f=>{f.onclick=()=>{
+      if(f.dataset.k!==k){f.classList.add('wiggle');setTimeout(()=>f.classList.remove('wiggle'),500);say(`यह ${FISHC[f.dataset.k].name} मछली है। ${F.name} मछली ढूँढो।`);return;}
+      if(f.dataset.c){say('इसे गिन लिया है।');return;}
+      n++;f.dataset.c=n;glow(f,false);aq.mark(f,n);speak(NUMW[n]);
+      if(n===targets.length){aq.fish.forEach(x=>x.onclick=null);clearActions();setTimeout(done,800);}
+    };});
+  });
+  await say('कितनी गिनीं? संख्या चुनो।');
+  const correct=targets.length,last=targets.find(f=>+f.dataset.c===correct);
+  const {v}=await pick([1,2,3,4,5]);
+  if(v!==correct){await pointTo(last);await say(`आख़िरी ${F.name} मछली पर ${correct} लिखा है। तो ${correct} लिखेंगे।`);hideHand();}
+  clearActions();
+  await fly(numChip(correct),last.querySelector('.marker')||last,row.num);tb.setVal(k,correct);
+  await say(`${F.name} मछलियाँ ${correct} हैं। तालिका में ${correct} लिख दिया।`);
+  aq.clearMarks();row.row.classList.remove('focus');targets.forEach(f=>delete f.dataset.c);
+}
+async function readFish(aq,tb){
+  const R=tb.rows,order=['y','p','u'];
+  const off=()=>{hideHand();unhl();aq.fish.forEach(f=>glow(f,false));};
+  await say('अब इसी तालिका से जानकारी पढ़ते हैं।');
+  // model: find pink, read its number
+  await say('गुलाबी मछलियाँ कितनी हैं?');
+  await pointTo(R.p.lab);R.p.lab.classList.add('hl');
+  await say('पहले गुलाबी मछली वाली पंक्ति ढूँढो।');
+  await pointTo(R.p.num);R.p.num.classList.add('hl');
+  await say('इसी पंक्ति में संख्या है: 2।');
+  glow(aq.of('p'));
+  await say('गुलाबी मछलियाँ 2 हैं। एक्वेरियम में भी 2 हैं।');
+  off();await nextBtn();
+  // child connects another colour
+  await say('अब तुम पीली या बैंगनी मछली की पंक्ति पर टैप करो।');
+  const t1=await tapOnce([R.y.row,R.u.row]);const k1=t1===R.y.row?'y':'u';
+  R[k1].lab.classList.add('hl');await pointTo(R[k1].num);R[k1].num.classList.add('hl');glow(aq.of(k1));
+  await say(`इस पंक्ति में ${R[k1].value} है। ${FISHC[k1].name} मछलियाँ ${R[k1].value} हैं।`);
+  off();await nextBtn();
+  // most — demonstrated
+  await say('किस रंग की मछलियाँ सबसे ज़्यादा हैं?');
+  await say('तीनों संख्याएँ देखो।');
+  for(const k of order){await pointTo(R[k].num);R[k].num.classList.add('hl');await speak(NUMW[R[k].value]);}
+  hideHand();unhl();R.u.num.classList.add('hl','big');
+  await say('4 सबसे बड़ी संख्या है।');
+  R.u.lab.classList.add('hl');glow(aq.of('u'));
+  await say('इसलिए बैंगनी मछलियाँ सबसे ज़्यादा हैं।');
+  R.u.num.classList.remove('big');off();await nextBtn();
+  // least — child participates, system completes
+  await say('अब सबसे कम वाली ढूँढो।');
+  await say('सबसे छोटी संख्या वाली पंक्ति पर टैप करो।');
+  const t2=await tapOnce(order.map(k=>R[k].row));
+  if(t2!==R.p.row){await say('देखो: 3, 2 और 4।');}
+  R.p.num.classList.add('hl');R.p.lab.classList.add('hl');glow(aq.of('p'));
+  await say('2 सबसे छोटी है। गुलाबी मछलियाँ सबसे कम हैं।');
+  off();await nextBtn();
+  // total
+  await say('सब मिलाकर कितनी मछलियाँ हैं?');
+  const eq=makeEq(['','+','','+','','=','?']);tb.el.append(eq.el);
+  await say('तीनों गिनतियाँ एक जगह लाते हैं।');
+  for(let i=0;i<3;i++){const k=order[i];R[k].row.classList.add('focus');glow(aq.of(k));await fly(numChip(R[k].value),R[k].num,eq.boxes[i]);eq.set(i,R[k].value);await say(`${FISHC[k].name} ${R[k].value}`);glow(aq.of(k),false);R[k].row.classList.remove('focus');}
+  await say('अब हर समूह को एक-एक बार गिनते हैं।');
+  let c=0;for(const k of order){glow(aq.of(k));for(const f of aq.of(k)){c++;aq.mark(f,c);await speak(NUMW[c]);}glow(aq.of(k),false);}
+  await say('3 + 2 + 4 = ? संख्या चुनो।');
+  const {v}=await pick([8,9,10]);
+  const lastF=aq.of('u')[3];
+  if(v!==9){await pointTo(lastF);await say('आख़िरी मछली पर 9 है।');hideHand();}
+  clearActions();eq.set(3,9);
+  await say('3 + 2 + 4 = 9। कुल 9 मछलियाँ हैं।');
+  aq.clearMarks();await nextBtn();eq.el.remove();
+  // reverse lookup — demonstrated
+  await say('अब उल्टा सवाल: किस रंग की मछलियाँ दो हैं?');
+  await say('संख्याओं में 2 ढूँढते हैं।');
+  for(const k of order){await pointTo(R[k].num);R[k].num.classList.add('hl');await wait(350);if(k==='p')break;R[k].num.classList.remove('hl');}
+  await say('यह रहा 2।');
+  await pointTo(R.p.lab);R.p.lab.classList.add('hl');glow(aq.of('p'));
+  await say('2 गुलाबी मछली की पंक्ति में है। गुलाबी मछलियाँ दो हैं।');
+  off();await nextBtn();
+  // reverse lookup — child participates
+  await say('अब तुम: किस रंग की मछलियाँ चार हैं?');
+  await say('तालिका में 4 पर टैप करो।');
+  const t3=await tapOnce(order.map(k=>R[k].num));
+  if(t3!==R.u.num){await pointTo(R.u.num);await say('4 यहाँ है।');}
+  R.u.num.classList.add('hl');await pointTo(R.u.lab);R.u.lab.classList.add('hl');glow(aq.of('u'));
+  await say('4 बैंगनी मछली की पंक्ति में है। बैंगनी मछलियाँ चार हैं।');
+  off();
+}
+
+/* ============ TEACHING 2: toy shelf → unit pictograph ============ */
+async function teachToys(){
+  setPhase(0);clearStage();clearActions();currentQ=null;
+  const sh=makeShelf();
+  const pg=makePicto('खिलौनों का चित्रालेख',[{key:'car',icon:carSVG(),label:'कार'},{key:'ball',icon:ballSVG(),label:'गेंद'},{key:'teddy',icon:teddySVG(),label:'टेडी'}],6,'खिलौना');
+  stage.append(h('div',{class:'duo'},sh.el,pg.el));
+  const P=pg.rows,cars=sh.of('car');
+  const off=()=>{hideHand();unhl();sh.toys.forEach(t=>glow(t,false));};
+  async function record(toy,k,n){const d=h('span',{class:'dot fly'});const slot=P[k].slots[P[k].dots.length];await fly(d,toy,slot,650);const dot=pg.addDot(k);dot._toy=toy;toy.classList.add('used');toy.append(h('span',{class:'tdot'}));speak(NUMW[n]);await wait(250);}
+  await say('यह खिलौनों की अलमारी है। इसमें कारें, गेंदें और टेडी हैं।');
+  await say('चलो, इनका चित्रालेख बनाते हैं।');
+  for(const k of ['car','ball','teddy']){await pointTo(P[k].pic);P[k].pic.classList.add('hl');await wait(250);}
+  await say('हर पंक्ति के आगे एक चित्र है। चित्र बताता है कि पंक्ति किसकी है।');
+  off();
+  // system models cars
+  P.car.row.classList.add('focus');
+  await say('हर कार के लिए एक बिंदु लगाते हैं।');
+  for(let i=0;i<cars.length;i++){await pointTo(cars[i]);await record(cars[i],'car',i+1);}
+  hideHand();
+  await say('5 कारें, 5 बिंदु।');
+  P.car.row.classList.remove('focus');await nextBtn();
+  await childToys('ball');await childToys('teddy');
+  async function childToys(k){
+    const T=TOYS[k],targets=sh.of(k);let n=0;
+    P[k].row.classList.add('focus');
+    await say(`अब तुम हर ${T.sing} पर टैप करो। हर ${T.sing} का एक बिंदु बनेगा।`);
+    await new Promise(done=>{
+      clearActions();
+      const help=h('button',{class:'btn soft'},'मदद');
+      help.onclick=()=>{const left=targets.filter(t=>!t.classList.contains('used'));glow(left);say(`ये ${T.plur} चमक रहे हैं। इन पर टैप करो।`);setTimeout(()=>glow(left,false),3000);};
+      actions.append(help);
+      let busy=false;
+      sh.toys.forEach(t=>{t.onclick=async()=>{
+        if(busy)return;
+        if(t.dataset.k!==k){t.classList.add('wiggle');setTimeout(()=>t.classList.remove('wiggle'),500);say(`यह ${TOYS[t.dataset.k].sing} है। ${T.sing} ढूँढो।`);return;}
+        if(t.classList.contains('used')){say('इसका बिंदु लग गया है।');return;}
+        busy=true;glow(t,false);n++;await record(t,k,n);busy=false;
+        if(n===targets.length){sh.toys.forEach(x=>x.onclick=null);clearActions();setTimeout(done,500);}
+      };});
+    });
+    await say(`${n} ${T.plur}, ${n} बिंदु।`);
+    P[k].row.classList.remove('focus');
+  }
+  // one identical dot = one toy; picture is not counted
+  pg.key.classList.add('hl');
+  await say('देखो: एक बिंदु मतलब एक खिलौना।');
+  const d0=P.car.dots[0];glow(d0._toy);d0.classList.add('end');await pointTo(d0);
+  await say('यह कार, और यह उसका बिंदु।');
+  d0.classList.remove('end');off();
+  await say('सारे बिंदु एक जैसे हैं और बराबर दूरी पर हैं।');
+  for(const k of ['car','ball','teddy'])P[k].pic.classList.add('hl');
+  await say('चित्र को नहीं गिनते। सिर्फ़ बिंदु गिनते हैं।');
+  off();await nextBtn();
+  // reading the pictograph — modelled
+  await say('अब चित्रालेख पढ़ते हैं। गेंदें कितनी हैं?');
+  await pointTo(P.ball.pic);P.ball.pic.classList.add('hl');
+  await say('पहले गेंद वाली पंक्ति ढूँढो। फिर उसके बिंदु गिनो।');
+  for(let i=0;i<P.ball.dots.length;i++){await pointTo(P.ball.dots[i]);markDot(P.ball.dots[i],i+1);await speak(NUMW[i+1]);}
+  hideHand();glow(sh.of('ball'));
+  await say('3 बिंदु, यानी 3 गेंदें।');
+  pg.el.querySelectorAll('.dmark').forEach(m=>m.remove());off();await nextBtn();
+  // reading — child participates
+  await say('अब तुम टेडी की पंक्ति के बिंदुओं पर टैप करके गिनो।');
+  P.teddy.pic.classList.add('hl');
+  let tc=0;
+  await new Promise(done=>{
+    const all=Object.values(P).flatMap(r=>r.dots);
+    P.teddy.dots.forEach(d=>d.classList.add('tappable'));
+    all.forEach(d=>{d.onclick=()=>{
+      if(!P.teddy.dots.includes(d)){say('टेडी वाली पंक्ति के बिंदु छुओ।');return;}
+      if(d.dataset.c)return;
+      tc++;d.dataset.c=tc;d.classList.remove('tappable');markDot(d,tc);speak(NUMW[tc]);
+      if(tc===P.teddy.dots.length){all.forEach(x=>x.onclick=null);setTimeout(done,600);}
+    };});
+  });
+  glow(sh.of('teddy'));
+  await say('2 बिंदु, यानी 2 टेडी।');
+  pg.el.querySelectorAll('.dmark').forEach(m=>m.remove());off();await nextBtn();
+  // compare cars and balls by pairing
+  await say('कारें ज़्यादा हैं या गेंदें?');
+  await say('कार के बिंदुओं और गेंद के बिंदुओं की जोड़ी बनाते हैं।');
+  P.car.row.classList.add('focus');P.ball.row.classList.add('focus');
+  await pointTo(P.ball.dots[0]);pairLine(pg.el,P.car.dots[0],P.ball.dots[0]);hideHand();
+  await say('एक कार-बिंदु, एक गेंद-बिंदु: एक जोड़ी।');
+  await say('अब बाकी गेंद-बिंदुओं पर टैप करके जोड़ी बनाओ।');
+  let paired=1;
+  await new Promise(done=>{
+    const rest=P.ball.dots.slice(1);rest.forEach(d=>d.classList.add('tappable'));
+    rest.forEach(d=>{d.onclick=()=>{if(d.classList.contains('paired'))return;const i=P.ball.dots.indexOf(d);d.classList.remove('tappable');pairLine(pg.el,P.car.dots[i],d);paired++;speak(paired===2?'दूसरी जोड़ी':'तीसरी जोड़ी');if(paired===3){rest.forEach(x=>x.onclick=null);setTimeout(done,900);}};});
+  });
+  await say('हर गेंद की जोड़ी बन गई।');
+  const extra=P.car.dots.slice(3);extra.forEach(d=>d.classList.add('extra'));glow(extra.map(d=>d._toy));
+  await say('ये 2 कार-बिंदु अकेले बचे। इनकी जोड़ी नहीं बनी।');
+  await say('इसलिए कारें, गेंदों से 2 ज़्यादा हैं।');
+  await say('और गेंदें, कारों से 2 कम हैं।');
+  const eq=makeEq(['','−','','=','']);pg.el.append(eq.el);
+  eq.set(0,5);await say('5 कारें');
+  eq.set(1,3);await say('3 की जोड़ी बनी');
+  eq.set(2,2);await say('2 बचीं');
+  await say('5 − 3 = 2। कारें 2 ज़्यादा, गेंदें 2 कम।');
+  off();
+}
+
+/* ============ shared display helpers for practice ============ */
+function buildDisplay(data){
+  if(data.kind==='table'){const t=makeTable(data.title,data.head,data.cats);return{kind:'table',data,comp:t,el:t.el};}
+  const p=makePicto(data.title,data.cats,7,data.unit);return{kind:'picto',data,comp:p,el:p.el};
+}
+function resetDisplay(D){
+  hideHand();
+  D.el.querySelectorAll('.hl,.paired,.extra,.end,.focus,.sel,.pickable').forEach(e=>e.classList.remove('hl','paired','extra','end','focus','sel','pickable'));
+  D.el.querySelectorAll('.dmark,.pairline,.eq').forEach(e=>e.remove());
+  Object.values(D.comp.rows).forEach(r=>r.row.onclick=null);
+}
+const catOf=(D,k)=>D.data.cats.find(c=>c.key===k);
+function optionButtons(q,D){
+  const isCat=CAT_TYPES.includes(q.type);
+  const vals=isCat?D.data.cats.map(c=>c.key):q.opts.slice().sort((a,b)=>a-b);
+  return vals.map(v=>{const b=h('button',{class:'opt'});if(isCat){const c=catOf(D,v);b.innerHTML=c.icon+`<span class="lbl">${c.label}</span>`;}else b.textContent=v;b.dataset.v=v;return b;});
+}
+function waitClick(btns){return new Promise(res=>btns.forEach(b=>b.onclick=()=>{btns.forEach(x=>x.onclick=null);res(b);}));}
+
+/* second-error demonstrations (guided only) */
+async function demo(q,D){
+  const R=D.comp.rows,cats=D.data.cats;
+  if(q.type==='value'){
+    const r=R[q.key],c=catOf(D,q.key);
+    if(D.kind==='table'){await pointTo(r.lab);r.lab.classList.add('hl');await say(`यह ${c.of} की पंक्ति है।`);await pointTo(r.num);r.num.classList.add('hl');await say('इसी पंक्ति की संख्या पढ़ो।');}
+    else{await pointTo(r.pic);r.pic.classList.add('hl');await say(`यह ${c.of} की पंक्ति है। बिंदु गिनते हैं।`);for(let i=0;i<r.dots.length;i++){await pointTo(r.dots[i]);markDot(r.dots[i],i+1);await speak(NUMW[i+1]);}}
+  }else if(q.type==='find'){
+    await say(`संख्याओं में ${q.num} ढूँढते हैं।`);
+    for(const c of cats){const r=R[c.key];await pointTo(r.num);r.num.classList.add('hl');await wait(400);if(c.value===q.num){await pointTo(r.lab);r.lab.classList.add('hl');await say(`${q.num} इस पंक्ति में है। यह किस फल की पंक्ति है?`);break;}r.num.classList.remove('hl');}
+  }else if(q.type==='most'||q.type==='least'){
+    if(D.kind==='table'){for(const c of cats){await pointTo(R[c.key].num);R[c.key].num.classList.add('hl');await speak(NUMW[c.value]);}await say(q.type==='most'?'इनमें सबसे बड़ी संख्या कौन-सी है?':'इनमें सबसे छोटी संख्या कौन-सी है?');}
+    else{for(const c of cats){const r=R[c.key];const last=r.dots[r.dots.length-1];await pointTo(last);last.classList.add('end');}await say(q.type==='most'?'हर पंक्ति कहाँ तक जाती है, देखो। सबसे लंबी पंक्ति कौन-सी है?':'हर पंक्ति कहाँ तक जाती है, देखो। सबसे छोटी पंक्ति कौन-सी है?');}
+  }else if(q.type==='more'||q.type==='fewer'){
+    const A=R[q.a],B=R[q.b],m=Math.min(A.dots.length,B.dots.length);
+    A.row.classList.add('focus');B.row.classList.add('focus');
+    await say('जोड़ी बनाकर देखते हैं।');
+    for(let i=0;i<m;i++){await pointTo(B.dots[i]);pairLine(D.el,A.dots[i],B.dots[i]);await wait(200);}
+    const longer=A.dots.length>B.dots.length?A:B;longer.dots.slice(m).forEach(d=>d.classList.add('extra'));
+    await say('जिन बिंदुओं की जोड़ी नहीं बनी, उन्हें गिनो।');
+  }else if(q.type==='total'){
+    const eq=makeEq(['','+','','+','','=','?']);D.el.append(eq.el);
+    for(let i=0;i<cats.length;i++){const r=R[cats[i].key];r.row.classList.add('focus');await fly(numChip(cats[i].value),r.num,eq.boxes[i]);eq.set(i,cats[i].value);r.row.classList.remove('focus');}
+    await say('तीनों संख्याएँ जोड़ो।');
+  }
+  hideHand();
+}
+function confirmVisual(q,D){
+  const k=q.key||(CAT_TYPES.includes(q.type)?q.ans:null);if(!k)return;
+  const r=D.comp.rows[k];
+  if(D.kind==='table'){r.lab.classList.add('hl');r.num.classList.add('hl');}else{r.pic.classList.add('hl');r.row.classList.add('focus');}
+}
+
+/* ============ GUIDED PRACTICE (support fades) ============ */
+async function guided(){
+  setPhase(1);
+  await interstitial(SEARCH_ART,'अब साथ में अभ्यास करते हैं।','पहले तुम कोशिश करो। ज़रूरत हो तो मदद मिलेगी।');
+  let level=2,D=null; // 2 = help button + explained feedback; 1 = explained feedback; 0 = short feedback
+  for(let i=0;i<GUIDED.length;i++){
+    const q=GUIDED[i],isNew=!D||D.data!==q.d;if(isNew)D=buildDisplay(q.d);
+    clearStage();clearActions();
+    stage.append(h('div',{class:'qbanner'},h('span',{class:'qcount'},`सवाल ${i+1}/${GUIDED.length}`),h('span',null,q.q)),h('div',{class:'dispwrap'},D.el));
+    if(isNew){currentQ=null;await say(q.d.intro);if(q.d.intro2)await say(q.d.intro2);}
+    currentQ=q.q;await say(q.q);
+    const btns=optionButtons(q,D);actions.append(h('div',{class:'optwrap'},btns));
+    let help=null;if(level===2){help=h('button',{class:'btn soft small'},'मदद');actions.append(help);}
+    const rec={n:i+1,display:q.d.title,q:q.q,attempts:0,firstTry:false,helpAsked:false,demoShown:false,revealed:false,supportLevel:level};
+    let errors=0;
+    while(true){
+      const b=await waitClick(help?[...btns,help]:btns);
+      if(b===help){rec.helpAsked=true;help.disabled=true;await say(q.tip);help.disabled=false;continue;}
+      rec.attempts++;btns.forEach(x=>x.classList.remove('sel'));
+      if(String(b.dataset.v)===String(q.ans)){b.classList.add('right');break;}
+      errors++;b.classList.add('nudge');setTimeout(()=>b.classList.remove('nudge'),500);
+      btns.forEach(x=>x.disabled=true);
+      if(errors===1){await say('चलो, फिर से सोचें। '+q.tip);}
+      else if(errors===2){rec.demoShown=true;await say('आओ, साथ में देखें।');await demo(q,D);await say('अब फिर से चुनो।');}
+      else{rec.revealed=true;btns.find(x=>String(x.dataset.v)===String(q.ans)).classList.add('right');await say('यह देखो। '+q.ok);btns.forEach(x=>x.disabled=false);break;}
+      btns.forEach(x=>x.disabled=false);
+    }
+    btns.forEach(x=>{x.disabled=true;x.onclick=null;});if(help)help.remove();
+    rec.firstTry=errors===0&&!rec.helpAsked;REC.guided.push(rec);save();
+    if(!rec.revealed){if(level===2)confirmVisual(q,D);await say(level===0?'सही!':'सही! '+q.ok);}
+    if(rec.firstTry)level=Math.max(0,level-1);else if(errors>=2)level=2;else level=Math.max(level,1);
+    await nextBtn(i<GUIDED.length-1?'अगला सवाल':'आगे');
+    resetDisplay(D);
+  }
+}
+
+/* ============ INDEPENDENT: जानकारी खोजी ============ */
+function missionAnswer(m,D){
+  return new Promise(res=>{
+    clearActions();let sel=null,rowSel=null;
+    const btns=optionButtons(m,D);
+    const submit=h('button',{class:'btn'},'पक्का ✓');submit.disabled=true;
+    const upd=()=>{submit.disabled=!(sel!=null&&(m.type!=='decide'||rowSel!=null));};
+    btns.forEach(b=>b.onclick=()=>{btns.forEach(x=>x.classList.remove('sel'));b.classList.add('sel');sel=b.dataset.v;upd();});
+    const rows=[];
+    if(m.type==='decide'){for(const[k,r]of Object.entries(D.comp.rows)){r.row.classList.add('pickable');r.row.onclick=()=>{rows.forEach(x=>x.classList.remove('sel'));r.row.classList.add('sel');rowSel=k;upd();};rows.push(r.row);}}
+    submit.onclick=()=>{btns.forEach(b=>{b.disabled=true;b.onclick=null;});submit.disabled=true;rows.forEach(r=>r.onclick=null);res({sel,rowSel});};
+    actions.append(h('div',{class:'optwrap'},btns),submit);
+  });
+}
+async function independent(){
+  setPhase(2);
+  await interstitial(SEARCH_ART,'जानकारी खोजी!','हर मिशन में तालिका या चित्रालेख पढ़ो। जवाब चुनो, फिर "पक्का" दबाओ।');
+  let D=null;
+  for(let i=0;i<MISSIONS.length;i++){
+    const m=MISSIONS[i];if(!D||D.data!==m.d)D=buildDisplay(m.d);
+    clearStage();clearActions();
+    const mbar=h('div',{class:'missions'},MISSIONS.map((_,j)=>h('span',{class:'mb'+(j<i?' done':'')+(j===i?' cur':'')},String(j+1))));
+    stage.append(mbar,h('div',{class:'qbanner'},h('span',{class:'qcount'},`मिशन ${i+1}`),h('span',null,m.q)),h('div',{class:'dispwrap'},D.el));
+    currentQ=m.q;await say(m.q);
+    const {sel,rowSel}=await missionAnswer(m,D);
+    const correct=String(sel)===String(m.ans)&&(m.type!=='decide'||rowSel===m.row);
+    REC.independent.push({mission:i+1,display:m.d.title,type:m.type,q:m.q,answer:sel,row:rowSel,expected:m.ans,correct});save();
+    mbar.children[i].classList.add('done');
+    currentQ=null;await say(i<MISSIONS.length-1?(i%2?'जवाब मिल गया। अगला मिशन।':'ठीक है! अगला मिशन।'):'ठीक है!');
+    resetDisplay(D);
+  }
+}
+
+/* ============ end + adult report ============ */
+function labelFor(m,v){if(v==null)return '—';const c=m.d.cats.find(x=>x.key===v);return c?c.label:v;}
+function showReport(){
+  const g=REC.guided,ind=REC.independent,ok=ind.filter(r=>r.correct).length;
+  const gRows=g.map(r=>`<tr><td>${r.n}</td><td>${r.q}</td><td>${r.attempts}</td><td>${r.firstTry?'हाँ':'नहीं'}</td><td>${[r.helpAsked?'मदद माँगी':'',r.demoShown?'डेमो':'',r.revealed?'उत्तर दिखाया':''].filter(Boolean).join(', ')||'—'}</td><td>${r.supportLevel}</td></tr>`).join('');
+  const iRows=ind.map(r=>{const m=MISSIONS[r.mission-1];return `<tr><td>${r.mission}</td><td>${r.q}</td><td>${labelFor(m,r.answer)}${m.type==='decide'?' / पंक्ति: '+labelFor(m,r.row):''}</td><td>${labelFor(m,r.expected)}</td><td>${r.correct?'✓':'✗'}</td></tr>`;}).join('');
+  $('#reportSheet').innerHTML=`<h2>बड़ों के लिए रिपोर्ट — G2.52</h2><p>शुरुआत: ${new Date(REC.startedAt).toLocaleString()}</p>
+  <h3>स्वतंत्र अभ्यास (जानकारी खोजी): ${ok} / ${ind.length} सही</h3><p>हर मिशन का पहला जमा किया गया जवाब ही दर्ज है। कोई संकेत या मदद नहीं दी गई।</p>
+  <table><tr><th>#</th><th>मिशन</th><th>बच्चे का जवाब</th><th>सही जवाब</th><th>परिणाम</th></tr>${iRows||'<tr><td colspan=5>—</td></tr>'}</table>
+  <h3>साथ में अभ्यास (मदद के साथ — अलग से दर्ज)</h3><p>सहारा स्तर: 2 = मदद बटन + समझाया हुआ फ़ीडबैक, 1 = समझाया हुआ फ़ीडबैक, 0 = छोटा फ़ीडबैक।</p>
+  <table><tr><th>#</th><th>सवाल</th><th>कोशिशें</th><th>पहली बार सही</th><th>सहारा मिला</th><th>स्तर</th></tr>${gRows||'<tr><td colspan=6>—</td></tr>'}</table>
+  <p style="color:#6E6A80">सीखें वाले हिस्से में कोई अंक या जाँच नहीं है। यह डेटा इसी ब्राउज़र में भी सहेजा जाता है (G2_52_last_session)।</p>
+  <button class="btn small" id="closeRep">बंद करें</button>`;
+  $('#report').classList.add('show');$('#closeRep').onclick=()=>$('#report').classList.remove('show');
+}
+async function finish(){
+  setPhase(3);clearStage();clearActions();currentQ=null;save();
+  const box=h('div',{class:'inter'},h('div',{class:'inter-art',html:SEARCH_ART}),h('h1',null,'शाबाश, जानकारी खोजी!'),h('p',null,'तुमने सारे मिशन पूरे किए।'));
+  stage.append(box);
+  for(let i=0;i<18;i++){const s=h('span',{class:'star'},'★');s.style.left=Math.random()*100+'%';s.style.top='0';s.style.color=['#FFC93C','#FF7EB6','#9B6BEF','#3B82F6'][i%4];s.style.animationDelay=(Math.random()*1.2)+'s';stage.style.position='relative';stage.append(s);}
+  await say('शाबाश, जानकारी खोजी! तुमने सारे मिशन पूरे किए।');
+  const rep=h('button',{class:'btn soft small'},'बड़ों के लिए रिपोर्ट');rep.onclick=showReport;
+  const again=h('button',{class:'btn'},'फिर से शुरू');again.onclick=()=>location.reload();
+  actions.append(rep,again);
+}
+
+/* ============ start ============ */
+async function run(from){
+  if(from<=0){await teachFish();await interstitial(teddySVG(),'वाह! अब खिलौनों की बारी।','इस बार गिनती को बिंदुओं से दिखाएँगे।');await teachToys();await nextBtn();}
+  if(from<=1)await guided();
+  await independent();
+  await finish();
+}
+function startScreen(){
+  setPhase(-1);clearStage();
+  const art=`<svg viewBox="0 0 300 160"><g transform="translate(20,40) scale(.9)">${fishSVG('#FFC93C','#E0A100').replace('<svg','<svg width="100" height="64"')}</g><g transform="translate(110,20) scale(.9)">${fishSVG('#FF7EB6','#D94F8C').replace('<svg','<svg width="100" height="64"')}</g><g transform="translate(195,55) scale(.9)">${fishSVG('#9B6BEF','#6E43C4').replace('<svg','<svg width="100" height="64"')}</g></svg>`;
+  const go=h('button',{class:'btn'},'शुरू करें  ▶');
+  const adult=h('div',{class:'adult'},'बड़ों के लिए, सीधे जाएँ:');
+  const j1=h('button',{class:'btn soft small'},'साथ में अभ्यास');const j2=h('button',{class:'btn soft small'},'जानकारी खोजी');adult.append(j1,j2);
+  stage.append(h('div',{class:'inter'},h('div',{class:'inter-art',html:art}),h('h1',null,'आँकड़े पढ़ो, जवाब खोजो'),h('p',null,'तालिका और चित्रालेख से जानकारी ढूँढना'),go,adult));
+  $('#ptext').textContent='शुरू करने के लिए बटन दबाओ।';
+  const begin=from=>{if('speechSynthesis' in window)pickVoice();clearActions();run(from).catch(e=>console.error(e));};
+  go.onclick=()=>begin(0);j1.onclick=()=>begin(1);j2.onclick=()=>begin(2);
+}
+startScreen();
+</script>
+</body>
+</html>
